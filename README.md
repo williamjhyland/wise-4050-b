@@ -37,7 +37,7 @@ This package includes an integration with the Modbus TCP protocol, facilitating 
 For changing only Coil 1 and Coil 4
 {
     "coil1": true,
-    "coil4": false,
+    "coil4": false
 }
 ```
 ```json
@@ -46,6 +46,6 @@ For changing all four Coils
     "coil1": true,
     "coil2": false,
     "coil3": true,
-    "coil4": false,
+    "coil4": false
 }
 ```
