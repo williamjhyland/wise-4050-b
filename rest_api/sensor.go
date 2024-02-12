@@ -9,43 +9,49 @@ import (
     "sync"
 )
 
-var Model = "REST API Sensor"
-var PrettyName = "REST API Sensor for Device"
-var Description = "Sensor to interact with a device over REST API."
+var errUnimplemented = errors.New("unimplemented")
+var Model = resource.NewModel("bill", "wise4050", "restapi")
+var PrettyName = "WISE-4050 4DI/4DO 2.4G WiFi IoT Wireless I/O Module"
+var Description = "WISE-4000 series is an Ethernet-based wired or wireless IoT device, which inte- grated with IoT data acquisition, processing, and publishing functions."
 
-type RESTSensor struct {
-    Config      *RESTConfig
+type mySensor struct {
+    Config      *CloudConfig
     httpClient  *http.Client
     mu          sync.RWMutex
     cancelFunc  context.CancelFunc
 }
 
 func init() {
-    // Register your sensor with a system or framework if needed
+	resource.RegisterComponent(
+		sensor.API,
+		Model,
+		resource.Registration[sensor.Sensor, *CloudConfig]{Constructor: NewSensor})
 }
 
-func NewSensor(ctx context.Context, config *RESTConfig) (*RESTSensor, error) {
-    if err := config.Validate(); err != nil {
-        return nil, err
-    }
-
-    sensor := &RESTSensor{
-        Config:     config,
-        httpClient: &http.Client{},
-    }
-
-    return sensor, nil
+func NewSensor(ctx context.Context, deps resource.Dependencies, conf resource.Config, logger logging.Logger) (sensor.Sensor, error) {
+	logger.Infof("Starting %s %s", PrettyName)
+	s := &mySensor{
+		Named:  conf.ResourceName().AsNamed(),
+		logger: logger,
+	}
+	if err := s.Reconfigure(ctx, deps, conf); err != nil {
+		return nil, err
+	}
+	return s, nil
 }
 
-func (s *RESTSensor) Reconfigure(ctx context.Context, config *RESTConfig) error {
-    if err := config.Validate(); err != nil {
-        return err
-    }
 
-    s.mu.Lock()
-    defer s.mu.Unlock()
-    s.Config = config
-    return nil
+func (s *mySensor) Reconfigure(ctx context.Context, deps resource.Dependencies, conf resource.Config) error {
+	var err error
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.sensorConfig, err = resource.NativeConfig[*CloudConfig](conf)
+	if err != nil {
+		return err
+	}
+	s.logger.Debugf("Reconfiguring %s", PrettyName)
+
+	return err
 }
 
 func (s *RESTSensor) Readings(ctx context.Context) ([]byte, error) {
@@ -83,3 +89,8 @@ func (s *RESTSensor) DoCommand(ctx context.Context, cmd map[string]interface{}) 
 }
 
 func (s *RESTSensor) Close(ctx context.Context) error {
+    if s.cancelFunc != nil {
+        s.cancelFunc()
+    }
+    return nil
+}
