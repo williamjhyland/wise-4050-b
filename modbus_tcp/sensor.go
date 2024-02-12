@@ -15,7 +15,7 @@ import (
 )
 
 var errUnimplemented = errors.New("unimplemented")
-var Model = resource.NewModel("bill", "wise4050", "modbus")
+var Model = resource.NewModel("bill", "advantech-wise-4050", "modbus")
 var PrettyName = "WISE-4050 4DI/4DO 2.4G WiFi IoT Wireless I/O Module"
 var Description = "WISE-4000 series is an Ethernet-based wired or wireless IoT device, which inte- grated with IoT data acquisition, processing, and publishing functions."
 

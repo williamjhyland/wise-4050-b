@@ -1,0 +1,13 @@
+{
+  "module_id": "bill:advantech-wise-4050",
+  "visibility": "public",
+  "url": "https://github.com/williamjhyland/wise-4050-b",
+  "description": "Viam Module to Integrate WISE-4050 4DI/4DO 2.4G WiFi IoT Wireless I/O",
+  "models": [
+    {
+      "api": "rdk:component:sensor",
+      "model": "bill:advantech-wise-4050:modbus"
+    }
+  ],
+  "entrypoint": "./main/main"
+}
