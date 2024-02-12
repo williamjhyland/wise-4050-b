@@ -43,7 +43,7 @@ jobs:
       run: go build -o ./module ./main/module.go
 
     - name: Package
-      run: tar -zcf wise-4050-sensor-${{ env.os }}-${{ env.GOARCH }}.tar.gz wise-4050-sensor
+      run: tar -zcf wise-4050-sensor-${{ env.os }}-${{ env.GOARCH }}.tar.gz module
     
     - uses: actions/upload-artifact@v3
       with:
