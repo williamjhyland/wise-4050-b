@@ -9,5 +9,5 @@
       "model": "bill:advantech-wise-4050:modbus"
     }
   ],
-  "entrypoint": "./main/main"
+  "entrypoint": "./module"
 }
