@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
-	"strings"
 
 	"github.com/goburrow/modbus"
 	"go.viam.com/rdk/components/sensor"
@@ -19,7 +19,6 @@ var Model = resource.NewModel("bill", "wise4050", "modbus")
 var PrettyName = "WISE-4050 4DI/4DO 2.4G WiFi IoT Wireless I/O Module"
 var Description = "WISE-4000 series is an Ethernet-based wired or wireless IoT device, which inte- grated with IoT data acquisition, processing, and publishing functions."
 
-// Your sensor model type
 type mySensor struct {
 	resource.Named
 	logger       logging.Logger
@@ -133,54 +132,54 @@ func (s *mySensor) RunModbusTCP() (map[string]interface{}, error) {
 	client := modbus.NewClient(handler)
 	result := make(map[string]interface{})
 
-    // Read DI Status from the correct address
-    diCoilStates, err := readCoilStates(client, s.sensorConfig.DI.BaseAddress, s.sensorConfig.DI.Length) // Adjust starting address and length
-    if err != nil {
-        return nil, err
-    }
+	// Read DI Status from the correct address
+	diCoilStates, err := readCoilStates(client, s.sensorConfig.DI.BaseAddress, s.sensorConfig.DI.Length) // Adjust starting address and length
+	if err != nil {
+		return nil, err
+	}
 
 	fmt.Printf(strings.Join(diCoilStates, ", "))
-    result["inputCoils"] = strings.Join(diCoilStates, ", ")
+	result["inputCoils"] = strings.Join(diCoilStates, ", ")
 
-    // Read DO Status from the correct address
-    doCoilStates, err := readCoilStates(client, s.sensorConfig.DO.BaseAddress, s.sensorConfig.DO.Length) // Adjust starting address and length
-    if err != nil {
-        return nil, err
-    }
+	// Read DO Status from the correct address
+	doCoilStates, err := readCoilStates(client, s.sensorConfig.DO.BaseAddress, s.sensorConfig.DO.Length) // Adjust starting address and length
+	if err != nil {
+		return nil, err
+	}
 	fmt.Printf(strings.Join(doCoilStates, ", "))
-    result["outputCoils"] = strings.Join(doCoilStates, ", ")
+	result["outputCoils"] = strings.Join(doCoilStates, ", ")
 
-    return result, nil
+	return result, nil
 }
 
 func readCoilStates(client modbus.Client, startAddr, numCoils int) ([]string, error) {
-    uStartAddr := uint16(startAddr)
+	uStartAddr := uint16(startAddr)
 	uNumCoils := uint16(numCoils)
-    results, err := client.ReadCoils(uStartAddr, uNumCoils)
-    if err != nil {
-        fmt.Printf("Failed to read: %v\n", err)
-        return nil, err
-    }
+	results, err := client.ReadCoils(uStartAddr, uNumCoils)
+	if err != nil {
+		fmt.Printf("Failed to read: %v\n", err)
+		return nil, err
+	}
 
-    return decodeCoilValues(results, numCoils), nil
+	return decodeCoilValues(results, numCoils), nil
 }
 
 func decodeCoilValues(byteVal []byte, numCoils int) []string {
-    coilStates := make([]string, 0)
+	coilStates := make([]string, 0)
 	coilsProcessed := 0
-    for i, val := range byteVal {
-        for bit := 0; bit < 8; bit++ {
-            if coilsProcessed >= numCoils {
-                break // Exit if we've read all the coils we need
-            }
-            coilState := val&(1<<bit) != 0
-            stateStr := "False"
-            if coilState {
-                stateStr = "True"
-            }
+	for i, val := range byteVal {
+		for bit := 0; bit < 8; bit++ {
+			if coilsProcessed >= numCoils {
+				break // Exit if we've read all the coils we need
+			}
+			coilState := val&(1<<bit) != 0
+			stateStr := "False"
+			if coilState {
+				stateStr = "True"
+			}
 			coilStates = append(coilStates, fmt.Sprintf("Coil %d: %s", i*8+bit+1, stateStr))
 			coilsProcessed++
-        }
-    }
-    return coilStates
+		}
+	}
+	return coilStates
 }
